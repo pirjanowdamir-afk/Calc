@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Прайс Кухня">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a3a5c">
+<title>Прайс · Кухня под ключ</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f4f8;color:#1a202c;font-size:15px}
+  header{background:#1a3a5c;color:#fff;padding:14px 16px 10px;position:sticky;top:0;z-index:100}
+  header h1{font-size:17px;font-weight:600;margin-bottom:2px}
+  header p{font-size:12px;opacity:.75}
+  .install-hint{background:#12253b;color:#bcd6f2;font-size:11.5px;padding:7px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .install-hint button{background:#4fc3f7;color:#0b2338;border:none;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:14px;white-space:nowrap}
+  .tabs{display:flex;background:#142d47;overflow-x:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:0 0 auto;padding:10px 14px;font-size:13px;color:rgba(255,255,255,.65);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+  .tab.active{color:#fff;border-bottom-color:#4fc3f7}
+  .section{display:none;padding:12px}
+  .section.active{display:block}
+  .cat-title{font-size:13px;font-weight:600;color:#2b6cb0;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;padding-left:4px}
+  .cat-title:first-child{margin-top:0}
+  .row{background:#fff;border-radius:10px;margin-bottom:6px;padding:11px 12px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+  .row-info{}
+  .row-name{font-size:14px;font-weight:500;line-height:1.3;margin-bottom:2px}
+  .row-unit{font-size:12px;color:#718096}
+  .row-price{font-size:13px;color:#2b6cb0;font-weight:600;text-align:right;white-space:nowrap;margin-bottom:4px}
+  .qty-wrap{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+  .qty-btn{width:28px;height:28px;border-radius:50%;background:#ebf4ff;border:none;font-size:18px;color:#2b6cb0;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1}
+  .qty-btn:active{background:#bee3f8}
+  .qty-val{font-size:15px;font-weight:600;min-width:24px;text-align:center;color:#1a202c}
+  .row-sum{font-size:12px;color:#48bb78;font-weight:600;text-align:right;min-height:16px}
+  .total-bar{position:sticky;bottom:0;background:#1a3a5c;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 -2px 10px rgba(0,0,0,.2)}
+  .total-label{font-size:14px;opacity:.85}
+  .total-value{font-size:20px;font-weight:700;color:#90cdf4}
+  .reset-btn{background:rgba(255,255,255,.15);border:none;color:#fff;font-size:13px;padding:6px 12px;border-radius:20px;cursor:pointer;margin-left:12px}
+  .reset-btn:active{background:rgba(255,255,255,.25)}
+  .note-box{background:#ebf8ff;border-left:3px solid #4299e1;border-radius:0 8px 8px 0;padding:10px 12px;margin:12px 0;font-size:12px;color:#2c5282;line-height:1.5}
+  .summary-section{padding:12px 12px 80px}
+  .client-box{background:#fff;border-radius:10px;padding:12px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+  .client-box label{display:block;font-size:11px;color:#718096;margin-bottom:3px;margin-top:8px}
+  .client-box label:first-child{margin-top:0}
+  .client-box input{width:100%;border:1px solid #e2e8f0;border-radius:7px;padding:7px 9px;font-size:14px;color:#1a202c;background:#f8fafc}
+  .sum-item{background:#fff;border-radius:10px;padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+  .sum-name{font-size:13px;color:#4a5568;flex:1;margin-right:8px}
+  .sum-qty{font-size:12px;color:#718096;margin-right:8px}
+  .sum-price{font-size:14px;font-weight:600;color:#2b6cb0;white-space:nowrap}
+  .sum-empty{text-align:center;padding:40px;color:#a0aec0;font-size:14px}
+  .sum-total-row{background:#1a3a5c;border-radius:10px;padding:14px;margin-top:12px;display:flex;justify-content:space-between}
+  .sum-total-label{color:rgba(255,255,255,.8);font-size:14px}
+  .sum-total-val{color:#90cdf4;font-size:20px;font-weight:700}
+  .cat-group-title{font-size:12px;font-weight:700;color:#718096;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 6px 2px}
+  .pdf-btn{width:100%;background:#2b6cb0;color:#fff;border:none;font-size:14px;font-weight:600;padding:12px;border-radius:10px;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px}
+  .pdf-btn:active{background:#245a94}
+  .print-only{display:none}
+
+  @media print{
+    body{background:#fff;font-size:12px}
+    header,.install-hint,.tabs,.total-bar,.pdf-btn,.client-box input{display:none!important}
+    .section{display:none!important;padding:0}
+    .section.active{display:block!important}
+    .print-only{display:block!important}
+    .summary-section{padding:0}
+    .sum-item,.sum-total-row{box-shadow:none;border:1px solid #dfe6ee}
+    .sum-total-row{background:#1a3a5c!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .note-box{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Прайс · Кухня под ключ</h1>
+  <p>Москва · 2025 · Актуальные цены</p>
+</header>
+
+<div class="install-hint" id="installHint">
+  <span>Установите как приложение: ⋮ → «Добавить на главный экран»</span>
+  <button onclick="document.getElementById('installHint').style.display='none'">Ок</button>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" onclick="showTab(0)">Мебель</div>
+  <div class="tab" onclick="showTab(1)">Техника</div>
+  <div class="tab" onclick="showTab(2)">Подключение</div>
+  <div class="tab" onclick="showTab(3)">Вырезы</div>
+  <div class="tab" onclick="showTab(4)">Допработы</div>
+  <div class="tab" onclick="showTab(5)">Итог</div>
+</div>
+
+<div id="sections">
+
+<!-- ===== TAB 0: МЕБЕЛЬ ===== -->
+<div class="section active" id="sec0">
+<div style="padding-bottom:80px">
+
+<div class="cat-title">Сборка гарнитура</div>
+<div class="row" id="r0"><div class="row-info"><div class="row-name">Нижние модули кухни</div><div class="row-unit">пог. м</div></div><div><div class="row-price">1 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(0)">−</button><span class="qty-val" id="q0">0</span><button class="qty-btn" onclick="inc(0)">+</button></div><div class="row-sum" id="s0"></div></div></div>
+<div class="row" id="r1"><div class="row-info"><div class="row-name">Верхние модули кухни</div><div class="row-unit">пог. м</div></div><div><div class="row-price">1 200 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(1)">−</button><span class="qty-val" id="q1">0</span><button class="qty-btn" onclick="inc(1)">+</button></div><div class="row-sum" id="s1"></div></div></div>
+<div class="row" id="r2"><div class="row-info"><div class="row-name">Пенал / высокий шкаф</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 800 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(2)">−</button><span class="qty-val" id="q2">0</span><button class="qty-btn" onclick="inc(2)">+</button></div><div class="row-sum" id="s2"></div></div></div>
+<div class="row" id="r3"><div class="row-info"><div class="row-name">Регулировка фасадов и петель</div><div class="row-unit">шт.</div></div><div><div class="row-price">150 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(3)">−</button><span class="qty-val" id="q3">0</span><button class="qty-btn" onclick="inc(3)">+</button></div><div class="row-sum" id="s3"></div></div></div>
+<div class="row" id="r4"><div class="row-info"><div class="row-name">Установка ручек</div><div class="row-unit">шт.</div></div><div><div class="row-price">80 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(4)">−</button><span class="qty-val" id="q4">0</span><button class="qty-btn" onclick="inc(4)">+</button></div><div class="row-sum" id="s4"></div></div></div>
+<div class="row" id="r5"><div class="row-info"><div class="row-name">Установка цоколя / плинтуса</div><div class="row-unit">пог. м</div></div><div><div class="row-price">250 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(5)">−</button><span class="qty-val" id="q5">0</span><button class="qty-btn" onclick="inc(5)">+</button></div><div class="row-sum" id="s5"></div></div></div>
+<div class="row" id="r6"><div class="row-info"><div class="row-name">Карниз декоративный</div><div class="row-unit">пог. м</div></div><div><div class="row-price">300 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(6)">−</button><span class="qty-val" id="q6">0</span><button class="qty-btn" onclick="inc(6)">+</button></div><div class="row-sum" id="s6"></div></div></div>
+<div class="row" id="r7"><div class="row-info"><div class="row-name">Установка столешницы (ЛДСП/МДФ)</div><div class="row-unit">пог. м</div></div><div><div class="row-price">800 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(7)">−</button><span class="qty-val" id="q7">0</span><button class="qty-btn" onclick="inc(7)">+</button></div><div class="row-sum" id="s7"></div></div></div>
+<div class="row" id="r8"><div class="row-info"><div class="row-name">Столешница искусственный камень</div><div class="row-unit">пог. м</div></div><div><div class="row-price">1 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(8)">−</button><span class="qty-val" id="q8">0</span><button class="qty-btn" onclick="inc(8)">+</button></div><div class="row-sum" id="s8"></div></div></div>
+<div class="row" id="r9"><div class="row-info"><div class="row-name">Подрезка / стыковка столешницы</div><div class="row-unit">стык</div></div><div><div class="row-price">1 200 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(9)">−</button><span class="qty-val" id="q9">0</span><button class="qty-btn" onclick="inc(9)">+</button></div><div class="row-sum" id="s9"></div></div></div>
+<div class="row" id="r10"><div class="row-info"><div class="row-name">Уплотнитель / торец столешницы</div><div class="row-unit">пог. м</div></div><div><div class="row-price">200 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(10)">−</button><span class="qty-val" id="q10">0</span><button class="qty-btn" onclick="inc(10)">+</button></div><div class="row-sum" id="s10"></div></div></div>
+
+<div class="cat-title">Стеновые панели и фартук</div>
+<div class="row" id="r11"><div class="row-info"><div class="row-name">Монтаж стеновой панели (МДФ/ПВХ)</div><div class="row-unit">пог. м</div></div><div><div class="row-price">1 200 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(11)">−</button><span class="qty-val" id="q11">0</span><button class="qty-btn" onclick="inc(11)">+</button></div><div class="row-sum" id="s11"></div></div></div>
+<div class="row" id="r12"><div class="row-info"><div class="row-name">Монтаж фартука (стекло / HPL)</div><div class="row-unit">пог. м</div></div><div><div class="row-price">1 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(12)">−</button><span class="qty-val" id="q12">0</span><button class="qty-btn" onclick="inc(12)">+</button></div><div class="row-sum" id="s12"></div></div></div>
+<div class="row" id="r13"><div class="row-info"><div class="row-name">Монтаж фартука (плитка)</div><div class="row-unit">м²</div></div><div><div class="row-price">1 800 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(13)">−</button><span class="qty-val" id="q13">0</span><button class="qty-btn" onclick="inc(13)">+</button></div><div class="row-sum" id="s13"></div></div></div>
+<div class="row" id="r14"><div class="row-info"><div class="row-name">Вырез в фартуке под розетку</div><div class="row-unit">шт.</div></div><div><div class="row-price">350 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(14)">−</button><span class="qty-val" id="q14">0</span><button class="qty-btn" onclick="inc(14)">+</button></div><div class="row-sum" id="s14"></div></div></div>
+
+<div class="cat-title">Подсветка</div>
+<div class="row" id="r15"><div class="row-info"><div class="row-name">Монтаж LED-ленты подсветки</div><div class="row-unit">пог. м</div></div><div><div class="row-price">600 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(15)">−</button><span class="qty-val" id="q15">0</span><button class="qty-btn" onclick="inc(15)">+</button></div><div class="row-sum" id="s15"></div></div></div>
+<div class="row" id="r16"><div class="row-info"><div class="row-name">Установка точечного светильника</div><div class="row-unit">шт.</div></div><div><div class="row-price">400 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(16)">−</button><span class="qty-val" id="q16">0</span><button class="qty-btn" onclick="inc(16)">+</button></div><div class="row-sum" id="s16"></div></div></div>
+<div class="row" id="r17"><div class="row-info"><div class="row-name">Блок питания / диммер для LED</div><div class="row-unit">шт.</div></div><div><div class="row-price">500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(17)">−</button><span class="qty-val" id="q17">0</span><button class="qty-btn" onclick="inc(17)">+</button></div><div class="row-sum" id="s17"></div></div></div>
+
+</div>
+</div>
+
+<!-- ===== TAB 1: ТЕХНИКА ===== -->
+<div class="section" id="sec1">
+<div style="padding-bottom:80px">
+
+<div class="cat-title">Установка (без подключения)</div>
+<div class="row" id="r18"><div class="row-info"><div class="row-name">Мойка накладная / врезная</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(18)">−</button><span class="qty-val" id="q18">0</span><button class="qty-btn" onclick="inc(18)">+</button></div><div class="row-sum" id="s18"></div></div></div>
+<div class="row" id="r19"><div class="row-info"><div class="row-name">Смеситель кухонный</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 200 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(19)">−</button><span class="qty-val" id="q19">0</span><button class="qty-btn" onclick="inc(19)">+</button></div><div class="row-sum" id="s19"></div></div></div>
+<div class="row" id="r20"><div class="row-info"><div class="row-name">Сифон под мойку</div><div class="row-unit">шт.</div></div><div><div class="row-price">600 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(20)">−</button><span class="qty-val" id="q20">0</span><button class="qty-btn" onclick="inc(20)">+</button></div><div class="row-sum" id="s20"></div></div></div>
+<div class="row" id="r21"><div class="row-info"><div class="row-name">Духовой шкаф (встраиваемый)</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 200 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(21)">−</button><span class="qty-val" id="q21">0</span><button class="qty-btn" onclick="inc(21)">+</button></div><div class="row-sum" id="s21"></div></div></div>
+<div class="row" id="r22"><div class="row-info"><div class="row-name">Посудомоечная машина (встраиваемая)</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(22)">−</button><span class="qty-val" id="q22">0</span><button class="qty-btn" onclick="inc(22)">+</button></div><div class="row-sum" id="s22"></div></div></div>
+<div class="row" id="r23"><div class="row-info"><div class="row-name">Варочная панель электрическая</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 000 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(23)">−</button><span class="qty-val" id="q23">0</span><button class="qty-btn" onclick="inc(23)">+</button></div><div class="row-sum" id="s23"></div></div></div>
+<div class="row" id="r24"><div class="row-info"><div class="row-name">Варочная панель индукционная</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 200 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(24)">−</button><span class="qty-val" id="q24">0</span><button class="qty-btn" onclick="inc(24)">+</button></div><div class="row-sum" id="s24"></div></div></div>
+
+<div class="cat-title">Вытяжки</div>
+<div class="row" id="r25"><div class="row-info"><div class="row-name">Вытяжка встроенная (в шкаф)</div><div class="row-unit">шт.</div></div><div><div class="row-price">980 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(25)">−</button><span class="qty-val" id="q25">0</span><button class="qty-btn" onclick="inc(25)">+</button></div><div class="row-sum" id="s25"></div></div></div>
+<div class="row" id="r26"><div class="row-info"><div class="row-name">Вытяжка купольная (настенная)</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(26)">−</button><span class="qty-val" id="q26">0</span><button class="qty-btn" onclick="inc(26)">+</button></div><div class="row-sum" id="s26"></div></div></div>
+<div class="row" id="r27"><div class="row-info"><div class="row-name">Вытяжка островная / потолочная</div><div class="row-unit">шт.</div></div><div><div class="row-price">2 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(27)">−</button><span class="qty-val" id="q27">0</span><button class="qty-btn" onclick="inc(27)">+</button></div><div class="row-sum" id="s27"></div></div></div>
+<div class="row" id="r28"><div class="row-info"><div class="row-name">Монтаж воздуховода</div><div class="row-unit">пог. м</div></div><div><div class="row-price">500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(28)">−</button><span class="qty-val" id="q28">0</span><button class="qty-btn" onclick="inc(28)">+</button></div><div class="row-sum" id="s28"></div></div></div>
+<div class="row" id="r29"><div class="row-info"><div class="row-name">Короб под вентиляцию (монтаж)</div><div class="row-unit">пог. м</div></div><div><div class="row-price">800 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(29)">−</button><span class="qty-val" id="q29">0</span><button class="qty-btn" onclick="inc(29)">+</button></div><div class="row-sum" id="s29"></div></div></div>
+
+<div class="cat-title">Фильтры для воды</div>
+<div class="row" id="r30"><div class="row-info"><div class="row-name">Фильтр-кувшинная система (под мойку)</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 200 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(30)">−</button><span class="qty-val" id="q30">0</span><button class="qty-btn" onclick="inc(30)">+</button></div><div class="row-sum" id="s30"></div></div></div>
+<div class="row" id="r31"><div class="row-info"><div class="row-name">Система обратного осмоса</div><div class="row-unit">шт.</div></div><div><div class="row-price">2 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(31)">−</button><span class="qty-val" id="q31">0</span><button class="qty-btn" onclick="inc(31)">+</button></div><div class="row-sum" id="s31"></div></div></div>
+<div class="row" id="r32"><div class="row-info"><div class="row-name">Замена картриджей фильтра</div><div class="row-unit">шт.</div></div><div><div class="row-price">500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(32)">−</button><span class="qty-val" id="q32">0</span><button class="qty-btn" onclick="inc(32)">+</button></div><div class="row-sum" id="s32"></div></div></div>
+
+</div>
+</div>
+
+<!-- ===== TAB 2: ПОДКЛЮЧЕНИЕ ===== -->
+<div class="section" id="sec2">
+<div style="padding-bottom:80px">
+
+<div class="cat-title">Сантехника</div>
+<div class="row" id="r33"><div class="row-info"><div class="row-name">Подключение мойки (вода + канализация)</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(33)">−</button><span class="qty-val" id="q33">0</span><button class="qty-btn" onclick="inc(33)">+</button></div><div class="row-sum" id="s33"></div></div></div>
+<div class="row" id="r34"><div class="row-info"><div class="row-name">Подключение смесителя</div><div class="row-unit">шт.</div></div><div><div class="row-price">800 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(34)">−</button><span class="qty-val" id="q34">0</span><button class="qty-btn" onclick="inc(34)">+</button></div><div class="row-sum" id="s34"></div></div></div>
+<div class="row" id="r35"><div class="row-info"><div class="row-name">Подключение сифона к канализации</div><div class="row-unit">шт.</div></div><div><div class="row-price">500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(35)">−</button><span class="qty-val" id="q35">0</span><button class="qty-btn" onclick="inc(35)">+</button></div><div class="row-sum" id="s35"></div></div></div>
+<div class="row" id="r36"><div class="row-info"><div class="row-name">Подключение посудомоечной машины</div><div class="row-unit">шт.</div></div><div><div class="row-price">2 000 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(36)">−</button><span class="qty-val" id="q36">0</span><button class="qty-btn" onclick="inc(36)">+</button></div><div class="row-sum" id="s36"></div></div></div>
+<div class="row" id="r37"><div class="row-info"><div class="row-name">Подключение фильтра воды</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 000 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(37)">−</button><span class="qty-val" id="q37">0</span><button class="qty-btn" onclick="inc(37)">+</button></div><div class="row-sum" id="s37"></div></div></div>
+
+<div class="cat-title">Электрика</div>
+<div class="row" id="r38"><div class="row-info"><div class="row-name">Подключение варочной панели (380В)</div><div class="row-unit">шт.</div></div><div><div class="row-price">2 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(38)">−</button><span class="qty-val" id="q38">0</span><button class="qty-btn" onclick="inc(38)">+</button></div><div class="row-sum" id="s38"></div></div></div>
+<div class="row" id="r39"><div class="row-info"><div class="row-name">Подключение духового шкафа</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(39)">−</button><span class="qty-val" id="q39">0</span><button class="qty-btn" onclick="inc(39)">+</button></div><div class="row-sum" id="s39"></div></div></div>
+<div class="row" id="r40"><div class="row-info"><div class="row-name">Подключение вытяжки (к розетке)</div><div class="row-unit">шт.</div></div><div><div class="row-price">500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(40)">−</button><span class="qty-val" id="q40">0</span><button class="qty-btn" onclick="inc(40)">+</button></div><div class="row-sum" id="s40"></div></div></div>
+<div class="row" id="r41"><div class="row-info"><div class="row-name">Установка / перенос розетки</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 000 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(41)">−</button><span class="qty-val" id="q41">0</span><button class="qty-btn" onclick="inc(41)">+</button></div><div class="row-sum" id="s41"></div></div></div>
+<div class="row" id="r42"><div class="row-info"><div class="row-name">Подключение подсветки к питанию</div><div class="row-unit">точка</div></div><div><div class="row-price">600 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(42)">−</button><span class="qty-val" id="q42">0</span><button class="qty-btn" onclick="inc(42)">+</button></div><div class="row-sum" id="s42"></div></div></div>
+
+</div>
+</div>
+
+<!-- ===== TAB 3: ВЫРЕЗЫ ===== -->
+<div class="section" id="sec3">
+<div style="padding-bottom:80px">
+
+<div class="cat-title">Вырезы в столешнице</div>
+<div class="note-box">Цены указаны без учёта материала инструмента. ЛДСП — дешевле, искусственный камень — дороже.</div>
+<div class="row" id="r43"><div class="row-info"><div class="row-name">Вырез под мойку (ЛДСП / МДФ)</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(43)">−</button><span class="qty-val" id="q43">0</span><button class="qty-btn" onclick="inc(43)">+</button></div><div class="row-sum" id="s43"></div></div></div>
+<div class="row" id="r44"><div class="row-info"><div class="row-name">Вырез под мойку (искусств. камень)</div><div class="row-unit">шт.</div></div><div><div class="row-price">3 000 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(44)">−</button><span class="qty-val" id="q44">0</span><button class="qty-btn" onclick="inc(44)">+</button></div><div class="row-sum" id="s44"></div></div></div>
+<div class="row" id="r45"><div class="row-info"><div class="row-name">Вырез под варочную панель (ЛДСП)</div><div class="row-unit">шт.</div></div><div><div class="row-price">1 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(45)">−</button><span class="qty-val" id="q45">0</span><button class="qty-btn" onclick="inc(45)">+</button></div><div class="row-sum" id="s45"></div></div></div>
+<div class="row" id="r46"><div class="row-info"><div class="row-name">Вырез под варочную (камень / HPL)</div><div class="row-unit">шт.</div></div><div><div class="row-price">3 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(46)">−</button><span class="qty-val" id="q46">0</span><button class="qty-btn" onclick="inc(46)">+</button></div><div class="row-sum" id="s46"></div></div></div>
+<div class="row" id="r47"><div class="row-info"><div class="row-name">Вырез под трубы / коммуникации</div><div class="row-unit">шт.</div></div><div><div class="row-price">500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(47)">−</button><span class="qty-val" id="q47">0</span><button class="qty-btn" onclick="inc(47)">+</button></div><div class="row-sum" id="s47"></div></div></div>
+<div class="row" id="r48"><div class="row-info"><div class="row-name">Вырез под вентиляцию в столешнице</div><div class="row-unit">шт.</div></div><div><div class="row-price">800 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(48)">−</button><span class="qty-val" id="q48">0</span><button class="qty-btn" onclick="inc(48)">+</button></div><div class="row-sum" id="s48"></div></div></div>
+
+<div class="cat-title">Вырезы в фартуке / панели</div>
+<div class="row" id="r49"><div class="row-info"><div class="row-name">Вырез под розетку (МДФ / стекло)</div><div class="row-unit">шт.</div></div><div><div class="row-price">350 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(49)">−</button><span class="qty-val" id="q49">0</span><button class="qty-btn" onclick="inc(49)">+</button></div><div class="row-sum" id="s49"></div></div></div>
+<div class="row" id="r50"><div class="row-info"><div class="row-name">Вырез под смеситель в мойке</div><div class="row-unit">шт.</div></div><div><div class="row-price">800 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(50)">−</button><span class="qty-val" id="q50">0</span><button class="qty-btn" onclick="inc(50)">+</button></div><div class="row-sum" id="s50"></div></div></div>
+<div class="row" id="r51"><div class="row-info"><div class="row-name">Сверление отверстия (стена / плитка)</div><div class="row-unit">шт.</div></div><div><div class="row-price">300 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(51)">−</button><span class="qty-val" id="q51">0</span><button class="qty-btn" onclick="inc(51)">+</button></div><div class="row-sum" id="s51"></div></div></div>
+
+</div>
+</div>
+
+<!-- ===== TAB 4: ДОПРАБОТЫ ===== -->
+<div class="section" id="sec4">
+<div style="padding-bottom:80px">
+
+<div class="cat-title">Демонтаж</div>
+<div class="row" id="r52"><div class="row-info"><div class="row-name">Демонтаж старой кухни (под ключ)</div><div class="row-unit">пог. м</div></div><div><div class="row-price">800 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(52)">−</button><span class="qty-val" id="q52">0</span><button class="qty-btn" onclick="inc(52)">+</button></div><div class="row-sum" id="s52"></div></div></div>
+<div class="row" id="r53"><div class="row-info"><div class="row-name">Демонтаж столешницы</div><div class="row-unit">шт.</div></div><div><div class="row-price">700 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(53)">−</button><span class="qty-val" id="q53">0</span><button class="qty-btn" onclick="inc(53)">+</button></div><div class="row-sum" id="s53"></div></div></div>
+<div class="row" id="r54"><div class="row-info"><div class="row-name">Демонтаж техники (духовка, ПМ...)</div><div class="row-unit">шт.</div></div><div><div class="row-price">600 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(54)">−</button><span class="qty-val" id="q54">0</span><button class="qty-btn" onclick="inc(54)">+</button></div><div class="row-sum" id="s54"></div></div></div>
+<div class="row" id="r55"><div class="row-info"><div class="row-name">Вынос мусора (упаковка, короба)</div><div class="row-unit">м³</div></div><div><div class="row-price">1 500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(55)">−</button><span class="qty-val" id="q55">0</span><button class="qty-btn" onclick="inc(55)">+</button></div><div class="row-sum" id="s55"></div></div></div>
+
+<div class="cat-title">Логистика</div>
+<div class="row" id="r56"><div class="row-info"><div class="row-name">Подъём на этаж (без лифта)</div><div class="row-unit">этаж / позиция</div></div><div><div class="row-price">300 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(56)">−</button><span class="qty-val" id="q56">0</span><button class="qty-btn" onclick="inc(56)">+</button></div><div class="row-sum" id="s56"></div></div></div>
+<div class="row" id="r57"><div class="row-info"><div class="row-name">Выезд мастера (в черте МКАД)</div><div class="row-unit">выезд</div></div><div><div class="row-price">500 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(57)">−</button><span class="qty-val" id="q57">0</span><button class="qty-btn" onclick="inc(57)">+</button></div><div class="row-sum" id="s57"></div></div></div>
+<div class="row" id="r58"><div class="row-info"><div class="row-name">Срочный выезд (в течение 2 часов)</div><div class="row-unit">выезд</div></div><div><div class="row-price">1 000 ₽</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(58)">−</button><span class="qty-val" id="q58">0</span><button class="qty-btn" onclick="inc(58)">+</button></div><div class="row-sum" id="s58"></div></div></div>
+<div class="row" id="r59"><div class="row-info"><div class="row-name">Надбавка за выходные / праздники</div><div class="row-unit">% к итогу</div></div><div><div class="row-price">20%</div><div class="qty-wrap"><button class="qty-btn" onclick="dec(59)">−</button><span class="qty-val" id="q59">0</span><button class="qty-btn" onclick="inc(59)">+</button></div><div class="row-sum" id="s59"></div></div></div>
+
+</div>
+</div>
+
+<!-- ===== TAB 5: ИТОГ ===== -->
+<div class="section" id="sec5">
+<div class="summary-section">
+
+  <div class="print-only" id="printHeader" style="margin-bottom:14px">
+    <div style="font-size:16px;font-weight:700;color:#1a3a5c">Смета · Кухня под ключ</div>
+    <div style="font-size:12px;color:#4a5568;margin-top:2px" id="printMeta"></div>
+  </div>
+
+  <div class="client-box">
+    <label>Клиент / объект</label>
+    <input type="text" id="clientName" placeholder="Иван Иванов, ул. Примерная 1">
+    <label>Дата сметы</label>
+    <input type="date" id="clientDate">
+  </div>
+
+  <div id="summary-list"></div>
+  <div id="summary-empty" class="sum-empty">Добавьте услуги в других вкладках</div>
+  <div id="summary-total" style="display:none" class="sum-total-row">
+    <span class="sum-total-label">Итого</span>
+    <span class="sum-total-val" id="sum-total-val">0 ₽</span>
+  </div>
+  <div class="note-box" style="margin-top:16px">* Цены актуальны для Москвы на 2025 год. Итоговая стоимость уточняется на объекте. Материалы оплачиваются отдельно.</div>
+
+  <button class="pdf-btn" onclick="saveAsPdf()">⬇ Сохранить в PDF / отправить клиенту</button>
+</div>
+</div>
+
+</div><!-- /sections -->
+
+<div class="total-bar">
+  <div>
+    <div class="total-label">Итого</div>
+    <div class="total-value" id="total">0 ₽</div>
+  </div>
+  <button class="reset-btn" onclick="resetAll()">Сбросить</button>
+</div>
+
+<script>
+// ---- Service worker registration (required for reliable PWA install) ----
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function (err) {
+      console.log('SW registration failed:', err);
+    });
+  });
+}
+
+
+var prices = [
+  1500,1200,1800,150,80,250,300,800,1500,1200,200, // 0-10 мебель
+  1200,1500,1800,350, // 11-14 фартук
+  600,400,500, // 15-17 подсветка
+  1500,1200,600,1200,1500,1000,1200, // 18-24 техника
+  980,1500,2500,500,800, // 25-29 вытяжки
+  1200,2500,500, // 30-32 фильтры
+  1500,800,500,2000,1000, // 33-37 сантехника
+  2500,1500,500,1000,600, // 38-42 электрика
+  1500,3000,1500,3500,500,800, // 43-48 вырезы столешница
+  350,800,300, // 49-51 вырезы фартук
+  800,700,600,1500, // 52-55 демонтаж
+  300,500,1000,0 // 56-59 логистика (59 = 20% надбавка)
+];
+
+var names = [
+  'Нижние модули кухни','Верхние модули кухни','Пенал / высокий шкаф','Регулировка фасадов и петель','Установка ручек','Цоколь / плинтус','Карниз декоративный','Столешница (ЛДСП/МДФ)','Столешница искусств. камень','Подрезка / стыковка столешницы','Уплотнитель столешницы',
+  'Стеновая панель (МДФ/ПВХ)','Фартук (стекло / HPL)','Фартук (плитка)','Вырез в фартуке под розетку',
+  'LED-подсветка (лента)','Точечный светильник','Блок питания / диммер LED',
+  'Мойка накладная / врезная','Смеситель кухонный','Сифон под мойку','Духовой шкаф','Посудомоечная машина','Варочная панель электро','Варочная панель индукция',
+  'Вытяжка встроенная','Вытяжка купольная','Вытяжка островная','Воздуховод','Короб вентиляционный',
+  'Фильтр (под мойку)','Система обратного осмоса','Замена картриджей',
+  'Подкл. мойки (вода+кан.)','Подкл. смесителя','Подкл. сифона','Подкл. посудомойки','Подкл. фильтра воды',
+  'Подкл. варочной панели (380В)','Подкл. духового шкафа','Подкл. вытяжки','Установка розетки','Подкл. подсветки',
+  'Вырез мойка (ЛДСП)','Вырез мойка (камень)','Вырез варочная (ЛДСП)','Вырез варочная (камень)','Вырез трубы','Вырез вентиляция',
+  'Вырез розетка (фартук)','Вырез смесителя (мойка)','Сверление (стена/плитка)',
+  'Демонтаж кухни','Демонтаж столешницы','Демонтаж техники','Вынос мусора',
+  'Подъём на этаж','Выезд мастера (МКАД)','Срочный выезд','Надбавка выходные (+20%)'
+];
+
+var units = [
+  'пог.м','пог.м','шт.','шт.','шт.','пог.м','пог.м','пог.м','пог.м','стык','пог.м',
+  'пог.м','пог.м','м²','шт.',
+  'пог.м','шт.','шт.',
+  'шт.','шт.','шт.','шт.','шт.','шт.','шт.',
+  'шт.','шт.','шт.','пог.м','пог.м',
+  'шт.','шт.','шт.',
+  'шт.','шт.','шт.','шт.','шт.',
+  'шт.','шт.','шт.','шт.','точка',
+  'шт.','шт.','шт.','шт.','шт.','шт.',
+  'шт.','шт.','шт.',
+  'пог.м','шт.','шт.','м³',
+  'эт/поз','выезд','выезд','%'
+];
+
+var qtys = new Array(prices.length).fill(0);
+
+function fmt(n){return n.toLocaleString('ru-RU')+' ₽'}
+
+function calcTotal(){
+  var sum = 0;
+  for(var i=0;i<59;i++) sum += qtys[i]*prices[i];
+  if(qtys[59]>0) sum += Math.round(sum*0.2);
+  return sum;
+}
+
+function update(i){
+  var q = qtys[i];
+  document.getElementById('q'+i).textContent = q;
+  var s = document.getElementById('s'+i);
+  if(i===59){
+    s.textContent = q>0 ? '+20% к итогу' : '';
+  } else {
+    s.textContent = q>0 ? fmt(q*prices[i]) : '';
+  }
+  document.getElementById('total').textContent = fmt(calcTotal());
+  if(document.getElementById('sec5').classList.contains('active')) updateSummary();
+}
+
+function inc(i){qtys[i]++;update(i)}
+function dec(i){if(qtys[i]>0){qtys[i]--;update(i)}}
+
+function resetAll(){
+  for(var i=0;i<qtys.length;i++){qtys[i]=0;update(i);}
+}
+
+function showTab(n){
+  document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',i===n)});
+  document.querySelectorAll('.section').forEach(function(s,i){s.classList.toggle('active',i===n)});
+  if(n===5) updateSummary();
+}
+
+function updateSummary(){
+  var list = document.getElementById('summary-list');
+  var empty = document.getElementById('summary-empty');
+  var totBox = document.getElementById('summary-total');
+  list.innerHTML='';
+  var hasItems = false;
+  for(var i=0;i<qtys.length;i++){
+    if(qtys[i]>0){
+      hasItems=true;
+      var d=document.createElement('div');
+      d.className='sum-item';
+      var price_str = i===59 ? '+20% надбавка' : fmt(qtys[i]*prices[i]);
+      d.innerHTML='<span class="sum-name">'+names[i]+'</span><span class="sum-qty">'+qtys[i]+' '+units[i]+'</span><span class="sum-price">'+price_str+'</span>';
+      list.appendChild(d);
+    }
+  }
+  empty.style.display=hasItems?'none':'block';
+  totBox.style.display=hasItems?'flex':'none';
+  document.getElementById('sum-total-val').textContent=fmt(calcTotal());
+}
+
+function updatePrintMeta(){
+  var name = document.getElementById('clientName').value.trim();
+  var date = document.getElementById('clientDate').value;
+  var parts = [];
+  if(name) parts.push(name);
+  if(date){
+    var d = new Date(date+'T00:00:00');
+    parts.push(d.toLocaleDateString('ru-RU'));
+  } else {
+    parts.push(new Date().toLocaleDateString('ru-RU'));
+  }
+  document.getElementById('printMeta').textContent = parts.join(' · ');
+}
+
+function saveAsPdf(){
+  updatePrintMeta();
+  showTab(5);
+  setTimeout(function(){ window.print(); }, 80);
+}
+
+document.getElementById('clientName').addEventListener('input', updatePrintMeta);
+document.getElementById('clientDate').addEventListener('input', updatePrintMeta);
+if(!document.getElementById('clientDate').value){
+  document.getElementById('clientDate').value = new Date().toISOString().slice(0,10);
+}
+updatePrintMeta();
+</script>
+</body>
+</html>
